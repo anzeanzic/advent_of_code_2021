@@ -68,7 +68,6 @@ func AsStepsGoBy(octopuses [][]int) {
 
 		if octopusFlashCounter == len(octopuses)*len(octopuses[0]) {
 			fmt.Println("step", step+1)
-			//break
 		}
 
 		Print(octopuses)
@@ -78,9 +77,6 @@ func AsStepsGoBy(octopuses [][]int) {
 
 func CheckIfFlashes(octopuses [][]int, y int, x int, current_y int, current_x int) {
 	if octopuses[y][x] > 9 {
-		//isPrevious := y < current_y || (y == current_y && x < current_x)
-		//fmt.Println(y, x, octopuses[y][x])
-
 		if octopuses[y][x] > 10 {
 			return
 		}
@@ -144,8 +140,6 @@ func CheckIfFlashes(octopuses [][]int, y int, x int, current_y int, current_x in
 				CheckIfFlashes(octopuses, y-1, x+1, current_y, current_x)
 			}
 		}
-
-		//octopuses[y][x] = 0
 	}
 }
 
