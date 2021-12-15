@@ -2,10 +2,10 @@ package main
 
 import (
 	"bufio"
-	"container/heap"
 	"fmt"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -15,43 +15,12 @@ type Node struct {
 	y        int
 	value    int
 	distance int
-	index    int
 }
-type PriorityQueue []*Node
 type ByCost []Node
 
-/*func (a ByCost) Len() int           { return len(a) }
+func (a ByCost) Len() int           { return len(a) }
 func (a ByCost) Less(i, j int) bool { return a[i].distance < a[j].distance }
-func (a ByCost) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }*/
-func (pq PriorityQueue) Len() int { return len(pq) }
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	// We want Pop to give us the lowest based on expiration number as the priority
-	// The lower the expiry, the higher the priority
-	return pq[i].distance < pq[j].distance
-}
-
-// We just implement the pre-defined function in interface of heap.
-func (pq *PriorityQueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	item.index = -1
-	*pq = old[0 : n-1]
-	return item
-}
-func (pq *PriorityQueue) Push(x interface{}) {
-	n := len(*pq)
-	item := x.(*Node)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq PriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
+func (a ByCost) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func main() {
 	ReadFile()
@@ -87,13 +56,13 @@ func ReadFile() {
 	Print(risk_level)
 
 	start := Node{x: 0, y: 0, value: risk_level[0][0], distance: 0}
-	end := Node{x: len(risk_level[0]) - 1, y: len(risk_level) - 1, value: risk_level[len(risk_level)-1][len(risk_level[0])-1], distance: 0}
+	//end := Node{x: len(risk_level[0]) - 1, y: len(risk_level) - 1, value: risk_level[len(risk_level)-1][len(risk_level[0])-1], distance: 0}
 	adjacent_nodes = make([]Node, 0)
 
-	ShortestPath(risk_level, start, end)
+	ShortestPath(risk_level, start)
 }
 
-func ShortestPath(risk_level [][]int, start Node, end Node) {
+func ShortestPath(risk_level [][]int, start Node) {
 	// dijkstra
 	distances := make([][]int, len(risk_level))
 
@@ -105,41 +74,34 @@ func ShortestPath(risk_level [][]int, start Node, end Node) {
 		}
 	}
 
-	pq := make(PriorityQueue, 0)
-	heap.Init(&pq)
-	heap.Push(&pq, &Node{x: start.x, y: start.y, value: start.value, distance: start.distance})
+	queue := make([]Node, 0)
+	visited := make([]Node, 0)
 
-	visited := make(map[string]int, 0)
+	queue = append(queue, start)
 	distances[start.y][start.x] = 0
 
 	for {
-		if pq.Len()%100 == 0 {
-			fmt.Println(pq.Len())
-		}
+		fmt.Println(len(visited))
 
-		//if len(visited) == len(risk_level)*len(risk_level[0]) {
-		if pq.Len() == 0 {
+		if len(visited) == len(risk_level)*len(risk_level[0]) {
 			fmt.Println(len(visited), len(risk_level)*len(risk_level[0]))
 			break
 		}
 
-		currentNode := heap.Pop(&pq).(*Node)
+		currentNode := queue[0]
+		queue = queue[1:]
 
-		if currentNode.x == end.x && currentNode.y == end.y {
-			break
+		if !CheckIfNodeWasVisited(visited, currentNode) {
+			visited = append(visited, currentNode)
 		}
 
-		if !CheckIfNodeWasVisited(visited, *currentNode) {
-			visited[strconv.Itoa(currentNode.y)+strconv.Itoa(currentNode.x)] = 1
-		}
-
-		distances = GetAdjacentNodes(risk_level, currentNode, visited, distances, &pq)
+		distances, queue = GetAdjacentNodes(risk_level, currentNode, visited, distances, queue)
 	}
 
 	Print(distances)
 }
 
-func GetAdjacentNodes(risk_level [][]int, currentNode *Node, visited map[string]int, distances [][]int, pq *PriorityQueue) [][]int {
+func GetAdjacentNodes(risk_level [][]int, currentNode Node, visited []Node, distances [][]int, queue []Node) ([][]int, []Node) {
 	edgeDistance := -1
 	newDistance := 1
 
@@ -176,16 +138,24 @@ func GetAdjacentNodes(risk_level [][]int, currentNode *Node, visited map[string]
 				distances[adjacent_nodes[i].y][adjacent_nodes[i].x] = newDistance
 			}
 
-			heap.Push(pq, &Node{x: adjacent_nodes[i].x, y: adjacent_nodes[i].y, value: adjacent_nodes[i].value, distance: adjacent_nodes[i].distance})
+			queue = append(queue, adjacent_nodes[i])
 		}
 	}
 
-	return distances
+	sort.Sort(ByCost(queue))
+
+	return distances, queue
 }
 
-func CheckIfNodeWasVisited(visited map[string]int, adjacentNode Node) bool {
-	_, isVisited := visited[strconv.Itoa(adjacentNode.y)+strconv.Itoa(adjacentNode.x)]
-	//fmt.Println("adding", adjacentNode, isVisited)
+func CheckIfNodeWasVisited(visited []Node, adjacentNode Node) bool {
+	isVisited := false
+
+	for i := 0; i < len(visited); i++ {
+		if visited[i].x == adjacentNode.x && visited[i].y == adjacentNode.y {
+			isVisited = true
+			break
+		}
+	}
 
 	return isVisited
 }
