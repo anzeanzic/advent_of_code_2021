@@ -77,12 +77,40 @@ func ReadFile() {
 	file.Close()
 
 	Print(risk_level)
+	risk_level = ExtendRiskLevelMap(risk_level)
+	//Print(risk_level)
 
 	start := Node{x: 0, y: 0, value: risk_level[0][0], distance: 0}
 	end := Node{x: len(risk_level[0]) - 1, y: len(risk_level) - 1, value: risk_level[len(risk_level)-1][len(risk_level[0])-1], distance: 0}
 	adjacent_nodes = make([]Node, 0)
 
 	ShortestPath(risk_level, start, end)
+}
+
+func ExtendRiskLevelMap(risk_level [][]int) [][]int {
+	new_risk_level := make([][]int, len(risk_level)*5)
+
+	for i := 0; i < len(new_risk_level); i++ {
+		new_risk_level[i] = make([]int, len(risk_level[0])*5)
+	}
+
+	for y := 0; y < len(new_risk_level); y++ {
+		for x := 0; x < len(new_risk_level[y]); x++ {
+			map_y := int(math.Floor(float64(y) / float64(len(risk_level))))
+			map_x := int(math.Floor(float64(x) / float64(len(risk_level[0]))))
+			new_y := y % len(risk_level)
+			new_x := x % len(risk_level[0])
+			new_value := risk_level[new_y][new_x] + map_x + map_y
+
+			if new_value > 9 {
+				new_value = new_value % 9
+			}
+
+			new_risk_level[y][x] = new_value
+		}
+	}
+
+	return new_risk_level
 }
 
 func ShortestPath(risk_level [][]int, start Node, end Node) {
