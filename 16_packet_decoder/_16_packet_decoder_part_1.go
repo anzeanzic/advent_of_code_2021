@@ -51,7 +51,6 @@ func ParseString(binary string) {
 	}
 
 	fmt.Println("------------")
-	fmt.Println(binary)
 
 	ver, str_t := GetVersionAndType(binary)
 
@@ -113,45 +112,23 @@ func BinToHex(binary string) int {
 }
 
 func ParseTheLiteral(remainder string) int {
+	isFirstZero := false
 	number_str := ""
 	temp := ""
 	last_i := -1
-	literals := make([]string, 0)
-	bit_str := ""
-	//new_number := false
 
 	for i, rune := range remainder {
 		temp += string(rune)
 
 		if i%5 == 4 {
-			if string(temp[0]) == "1" {
-				bit_str += string(temp)
+			if string(temp[0]) == "1" || !isFirstZero && string(temp[0]) == "0" {
+				temp = temp[1:]
 				//num := BinToHex(temp)
 				//fmt.Println(temp, num)
-				number_str += temp[1:]
-				last_i = i
-			} else if string(temp[0]) == "0" {
-				bit_str += string(temp)
-				number_str += temp[1:]
+				number_str += temp
 				temp = ""
+				last_i = i
 			}
-		}
-
-		if temp == "" {
-			literals = append(literals, bit_str)
-			bit_str = ""
-		}
-	}
-
-	if temp != "" {
-		literals = append(literals, temp)
-	}
-
-	fmt.Println("literals", literals)
-
-	for _, literal := range literals {
-		if len(literal) >= 11 {
-			ParseString(literal)
 		}
 	}
 
@@ -170,21 +147,17 @@ func ParseTheOperator(remainder string) {
 		length_in_bits := remainder[1:16]
 		length_num, _ := strconv.ParseInt(length_in_bits, 2, 32)
 		packets_binary_str := remainder[16:]
-
-		packets_arr = append(packets_arr, packets_binary_str[0:length_num])
-		packets_arr = append(packets_arr, packets_binary_str[length_num:])
-
-		/*subpackets := ""
+		subpackets := ""
 
 		if int(length_num) <= len(packets_binary_str) {
 			subpackets = packets_binary_str[0:length_num]
 		} else {
 			subpackets = packets_binary_str
-		}*/
+		}
 
-		//fmt.Println("subpackets", subpackets)
+		fmt.Println("subpackets", subpackets)
 
-		/*for {
+		for {
 			_, str_t := GetVersionAndType(subpackets)
 
 			if str_t == 4 {
@@ -199,14 +172,71 @@ func ParseTheOperator(remainder string) {
 				}
 			}
 			break
-		}*/
+		}
 	} else {
 		// 11
-		//number_of_subpackets_binary_str := remainder[1:12]
-		//number_of_subpackets, _ := strconv.ParseInt(number_of_subpackets_binary_str, 2, 32)
+		number_of_subpackets_binary_str := remainder[1:12]
+		number_of_subpackets, _ := strconv.ParseInt(number_of_subpackets_binary_str, 2, 32)
 		packets_binary_str := remainder[12:]
-		packets_arr = append(packets_arr, packets_binary_str)
+		packets_str_arr := make([]string, 0)
+
+		// convert to
+		temp := ""
+
+		for _, rune := range packets_binary_str {
+			temp += string(rune)
+
+			if len(temp)%int(number_of_subpackets) == 0 {
+				packets_str_arr = append(packets_str_arr, temp)
+				temp = ""
+			}
+		}
+
+		// reverse the array
+		packets_str_arr = reverse(packets_str_arr)
+
+		// check if there are leading zeros added to the array
+		for _, str := range packets_str_arr {
+			num, _ := strconv.Atoi(str)
+
+			if num == 0 {
+				packets_str_arr = packets_str_arr[1:]
+			} else {
+				break
+			}
+		}
+
+		// reverse the array back
+		packets_str_arr = reverse(packets_str_arr)
+
+		// build the binary string back together
+		packets_str := ""
+
+		for _, str := range packets_str_arr {
+			packets_str += str
+		}
+
+		packet_len := len(packets_str) / int(number_of_subpackets)
+		fmt.Println("Packet len:", packet_len, "Num of subpackets:", number_of_subpackets)
+
+		// break the binary into packets
+		temp = ""
+
+		for i, rune := range packets_str {
+			if i != 0 && i%packet_len == 0 {
+				packets_arr = append(packets_arr, temp)
+				temp = ""
+			}
+
+			temp += string(rune)
+		}
+
+		packets_arr = append(packets_arr, temp)
 	}
+
+	//previous := math.Pow(2, math.Floor(math.Log(float64(length_num))/math.Log(2)))
+	//diff := int(length_num) - int(previous)
+	//fmt.Println(length, "Len:", length_num, "prevous:", previous, "ID:", lengthTypeID)
 
 	fmt.Println("packets", packets_arr)
 
@@ -217,4 +247,12 @@ func ParseTheOperator(remainder string) {
 	}
 
 	fmt.Println("sum", sum)
+}
+
+func reverse(s []string) []string {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+
+	return s
 }
