@@ -1,0 +1,77 @@
+inp w -> 1
+mul x 0 -> 0
+add x z -> 0
+mod x 26 -> 0
+div z 1 -> 0
+add x 15 -> 15
+eql x w -> 0
+eql x 0 -> 1
+mul y 0 -> 0
+add y 25 -> 25
+mul y x -> 25*1 = 25
+add y 1 -> 25+1 = 26
+mul z y -> 0
+mul y 0 -> 0
+add y w -> 1
+add y 15 -> 16
+mul y x -> 16
+add z y -> 16
+
+inp w -> 2
+mul x 0 -> 0
+add x z -> 0
+mod x 26 -> 0
+div z 1 -> 0
+add x 12 -> 12
+eql x w -> 0
+eql x 0 -> 1
+mul y 0 -> 0
+add y 25 -> 25
+mul y x -> 25*1 = 25
+add y 1 -> 25+1 = 26
+mul z y -> 0
+mul y 0 -> 0
+add y w -> 2
+add y 5 -> 7
+mul y x -> 7
+add z y -> 7
+
+-----------
+
+inp w -> 9
+mul x 0 -> 0
+add x z -> 0
+mod x 26 -> 0
+div z 1 -> 0
+add x 15 -> 15
+eql x w -> 0
+eql x 0 -> 1
+mul y 0 -> 0
+add y 25 -> 25
+mul y x -> 25*1 = 25
+add y 1 -> 25+1 = 26
+mul z y -> 0
+mul y 0 -> 0
+add y w -> 9
+add y 15 -> 24
+mul y x -> 24
+add z y -> 24
+
+inp w -> 8
+mul x 0 -> 0
+add x z -> 24
+mod x 26 -> 24
+div z 1 -> 0
+add x 15 -> 15
+eql x w -> 0
+eql x 0 -> 1
+mul y 0 -> 0
+add y 25 -> 25
+mul y x -> 25*1 = 25
+add y 1 -> 25+1 = 26
+mul z y -> 0
+mul y 0 -> 0
+add y w -> 9
+add y 15 -> 24
+mul y x -> 24
+add z y -> 24
