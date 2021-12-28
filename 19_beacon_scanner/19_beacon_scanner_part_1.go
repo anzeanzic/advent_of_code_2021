@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -162,9 +161,9 @@ func CalculateDistanceBetweenBeacons(ScannerReports []ScannerReport, orientation
 
 	//fmt.Println(scannerDistMaps)
 
-	CompareDistances(ScannerReports, scannerDistMaps)
-	fmt.Println(scannerDistMaps[1].dist_map[Beacon{x: 515, y: 917, z: -361}])
-	fmt.Println(scannerDistMaps[4].dist_map[Beacon{x: -743, y: 427, z: -804}])
+	//CompareDistances(ScannerReports, scannerDistMaps)
+	fmt.Println(scannerDistMaps[0].dist_map)
+	fmt.Println(scannerDistMaps[1].dist_map)
 }
 
 func ConsiderOrientation(beacon Beacon, orientation []int) Beacon {
@@ -190,12 +189,12 @@ func ConsiderCoordinateSwap(beacon Beacon, order []int) Beacon { // 1 0 2
 	return beacon
 }
 
-func CalculateDistance(beacon1 Beacon, beacon2 Beacon) float64 {
-	diff1 := math.Pow((float64(beacon2.x) - float64(beacon1.x)), 2)
-	diff2 := math.Pow((float64(beacon2.y) - float64(beacon1.y)), 2)
-	diff3 := math.Pow((float64(beacon2.z) - float64(beacon1.z)), 2)
+func CalculateDistance(beacon1 Beacon, beacon2 Beacon) (int, int, int) {
+	diff1 := beacon2.x - beacon1.x
+	diff2 := beacon2.y - beacon1.y
+	diff3 := beacon2.z - beacon1.z
 
-	return math.Sqrt(diff1 + diff2 + diff3)
+	return diff1, diff2, diff3
 }
 
 func CompareDistances(ScannerReports []ScannerReport, scannerDistMaps []ScannerDistMap) {
@@ -271,7 +270,7 @@ func CompareDistances(ScannerReports []ScannerReport, scannerDistMaps []ScannerD
 				if semi_count >= 12 {
 					count_equals += semi_count
 					ScannerPairs = append(ScannerPairs, ScannerPair{scanner1_index: i, scanner2_index: j, scanner1_coordinate: SameBeacons[0].beacon_1, scanner2_coordinate: SameBeacons[0].beacon_2})
-					//fmt.Println(SameBeacons)
+					fmt.Println(SameBeacons)
 					//ChangeCoordinatesRelativelyToScanner0(ScannerReports[j])
 				}
 			}
@@ -355,7 +354,7 @@ func ConvertAllCoordinates(ScannerPairs []ScannerPair) {
 		fmt.Println(trueCounter, FoundScanners)
 
 		if allScannersFound {
-			fmt.Println("breaking")
+			//fmt.Println("breaking")
 			break
 		} else {
 			// go through all scanner pairs and check if we can figure them out
@@ -370,22 +369,22 @@ func ConvertAllCoordinates(ScannerPairs []ScannerPair) {
 
 						FoundScanners[scanner_pair.scanner2_index] = true
 						scanners[scanner_pair.scanner2_index] = scanner_rel_0
-						fmt.Println("Found", scanner_pair.scanner2_index)
+						//fmt.Println("Found", scanner_pair.scanner2_index)
 					} else if FoundScanners[scanner_pair.scanner2_index] {
 						scanner_rel_0 := GetScannerCoordinatesRelativelyTo0(scanner_pair.scanner2_coordinate, scanner_pair.scanner1_coordinate)
 						//fmt.Println(scanner_rel_0)
 
 						FoundScanners[scanner_pair.scanner1_index] = true
 						scanners[scanner_pair.scanner1_index] = scanner_rel_0
-						fmt.Println("Found", scanner_pair.scanner1_index)
+						//fmt.Println("Found", scanner_pair.scanner1_index)
 					}
 				}
 			}
 		}
 	}
 
-	fmt.Println(ScannerPairs)
-	fmt.Println(scanners)
+	//fmt.Println(ScannerPairs)
+	//fmt.Println(scanners)
 	//fmt.Println(CoordinateRelativeTo0(Beacon{68, -1246, -43}, Beacon{x: 567, y: -361, z: 727}))
 	scanner_rel_0 := GetScannerCoordinatesRelativelyTo0(Beacon{x: -258, y: -428, z: 682}, Beacon{x: 553, y: 889, z: -390})
 	fmt.Println(CoordinateRelativeTo0(Beacon{68, -1246, -43}, Beacon{x: -759, y: -112, z: -32}))
